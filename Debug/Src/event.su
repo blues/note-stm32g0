@@ -1,0 +1,13 @@
+stm32g0xx_ll_pwr.h:412:22:LL_PWR_EnableFlashPowerDownInStop	8	static
+stm32g0xx_ll_pwr.h:447:22:LL_PWR_SetPowerMode	16	static
+stm32g0xx_ll_pwr.h:635:22:LL_PWR_EnableSRAMRetention	8	static
+stm32g0xx_ll_cortex.h:296:22:LL_LPM_EnableSleep	8	static
+stm32g0xx_ll_cortex.h:307:22:LL_LPM_EnableDeepSleep	8	static
+stm32g0xx_ll_cortex.h:331:22:LL_LPM_DisableSleepOnExit	8	static
+stm32g0xx_ll_cortex.h:343:22:LL_LPM_EnableEventOnPend	8	static
+event.c:38:6:eventWait	16	static
+event.c:66:6:eventPollTimer	8	static
+event.c:75:6:event	16	static
+event.c:80:10:eventOccurred	8	static
+event.c:85:6:eventClear	16	static
+event.c:90:6:eventSleep	24	static,ignoring_inline_asm
