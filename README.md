@@ -3,14 +3,14 @@
 This is an example of how to use the Notecard and the [note-c][note-c] library
 with the native STM32 SDK.
 
-The board that I used for testing is the [Nucleo-L432KC][board] kit with STM32G032 MCU.  This board
+The board that I used for testing is the [Nucleo-G031K8][board] kit with STM32G031 MCU.  This board
 was selected because of its minimalism and the fact that it has an integrated debug probe.
 
 As a proof-of-concept, it implements the same functions as the [note-arduino][note-arduino] library's JSON
 example.
 
 One other notable feature of this example is that it implements a working example of the
-STM32's extremely low-power STOP2 mode.  When running the example, the STM32 draws so little power that
+STM32's extremely low-power STOP1 mode.  When running the example, the STM32 draws so little power that
 it is highly applicable, by using the code here, for battery-powered applications. An extension of
 this example allows one to hook a wire to one of the STM32's GPIO pins, simulating a button press
 that will also wake up the STM32 to update its sensor readings.
@@ -53,10 +53,10 @@ In STM32CubeIDE, open the [note-stm32g0][note-stm32g0] project.  Make sure that 
 at the top of example.c so that this example will send data to your notehub.io project, and so that it uses
 serial or I2C as you wish.  By using the standard Debug build configuration, you should be able to build and run the project.
 
-This example has been tested with both UART and with I2C, and it has been verified that the project's STOP2 mode
+This example has been tested with both UART and with I2C, and it has been verified that the project's STOP1 mode
 works very reliably.  Note that in event.h there is a conditional (defaulted ON) that uses the green LED on the Nucleo
-to indicate whether or not the STM32 is in STOP2 mode.  If it's OFF, it is stopped.  (Note that it will never enter
-STOP2 mode while you are in the debugger, else the debugger would halt.)
+to indicate whether or not the STM32 is in STOP1 mode.  If it's OFF, it is stopped.  (Note that it will never enter
+STOP1 mode while you are in the debugger, else the debugger would halt.)
 
 [note-stm32g0]: https://github.com/blues/note-stm32g0
 [note-c]: https://github.com/blues/note-c
