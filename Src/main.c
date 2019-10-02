@@ -10,19 +10,22 @@
 #include "main.h"
 #include "note.h"
 
+// See Inc/MAIN.H for definitions that select whether to use UART or I2C for the Notecard
+
 // Whether or not debugging determines if we can ever go into STOP2 mode (because doing so messes up the debugger).
 // On Cortex-M4 this can be determined dynamically using CoreDebug->DHCSR, but in M0 the CoreDebug registers are
 // not available to the CPU.
 #define DEBUGGING           true
 
-// Choose whether to use I2C or SERIAL for the Notecard
-#define NOTECARD_USE_I2C 	false
-
 // I/O device handles
+#if USE_I2C
 I2C_HandleTypeDef hi2c1;
-UART_HandleTypeDef huart1;
 bool i2c1Initialized = false;
+#endif
+#if USE_UART
+UART_HandleTypeDef huart1;
 bool uart1Initialized = false;
+#endif
 
 // Low-power timer
 #ifdef EVENT_TIMER
@@ -31,11 +34,13 @@ uint32_t totalTimerMs = 0;
 #endif
 
 // Data used for Notecard I/O functions
-static char serialInterruptBuffer[1];
-static volatile size_t serialFillIndex = 0;
-static volatile size_t serialDrainIndex = 0;
-static uint32_t serialOverruns = 0;
-static char serialBuffer[512];
+#if USE_UART
+char serialInterruptBuffer[1];
+volatile size_t serialFillIndex = 0;
+volatile size_t serialDrainIndex = 0;
+uint32_t serialOverruns = 0;
+char serialBuffer[512];
+#endif
 
 // Forwards
 void SystemClock_Config(void);
@@ -50,7 +55,6 @@ void noteSerialTransmit(uint8_t *text, size_t len, bool flush);
 bool noteSerialAvailable(void);
 char noteSerialReceive(void);
 void noteI2CReset(void);
-size_t noteDebugSerialOutput(const char *message);
 const char *noteI2CTransmit(uint16_t DevAddress, uint8_t* pBuffer, uint16_t Size);
 const char *noteI2CReceive(uint16_t DevAddress, uint8_t* pBuffer, uint16_t Size, uint32_t *avail);
 
@@ -110,9 +114,15 @@ void SystemClock_Config(void) {
         Error_Handler();
 
     // Initializes the peripherals clocks
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1;
+    PeriphClkInit.PeriphClockSelection = 0;
+#if USE_UART
+    PeriphClkInit.PeriphClockSelection |= RCC_PERIPHCLK_USART1;
     PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK1;
+#endif
+#if USE_I2C
+    PeriphClkInit.PeriphClockSelection |= RCC_PERIPHCLK_I2C1;
     PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
+#endif
 #ifdef EVENT_TIMER
     PeriphClkInit.PeriphClockSelection |= RCC_PERIPHCLK_LPTIM1;
     PeriphClkInit.Lptim1ClockSelection = RCC_LPTIM1CLKSOURCE_LSI;
@@ -123,6 +133,7 @@ void SystemClock_Config(void) {
 }
 
 // I2C1 Initialization
+#if USE_I2C
 void MX_I2C1_Init(void) {
 
     // Exit if already done
@@ -152,8 +163,10 @@ void MX_I2C1_Init(void) {
         Error_Handler();
 
 }
+#endif
 
 // I2C1 De-initialization
+#if USE_I2C
 void MX_I2C1_DeInit(void) {
 
     // Exit if already done
@@ -168,9 +181,11 @@ void MX_I2C1_DeInit(void) {
     HAL_I2C_DeInit(&hi2c1);
 
 }
+#endif
 
 
 // USART1 Initialization
+#if USE_UART
 void MX_USART1_UART_Init(void) {
 
     // Exit if already done
@@ -211,8 +226,10 @@ void MX_USART1_UART_Init(void) {
     HAL_UART_Receive_IT(&huart1, (uint8_t *) &serialInterruptBuffer, sizeof(serialInterruptBuffer));
 
 }
+#endif
 
 // USART1 IRQ handler
+#if USE_UART
 void MY_UART_IRQHandler(UART_HandleTypeDef *huart) {
 
     // See if the transfer is completed
@@ -236,8 +253,10 @@ void MY_UART_IRQHandler(UART_HandleTypeDef *huart) {
     HAL_UART_Receive_IT(&huart1, (uint8_t *) &serialInterruptBuffer, sizeof(serialInterruptBuffer));
 
 }
+#endif
 
 // USART1 De-initialization
+#if USE_UART
 void MX_USART1_UART_DeInit(void) {
 
     // Exit if already done
@@ -249,6 +268,7 @@ void MX_USART1_UART_DeInit(void) {
     HAL_UART_DeInit(&huart1);
 
 }
+#endif
 
 // LPTIM1 Initialization
 #ifdef EVENT_TIMER
@@ -403,8 +423,12 @@ bool MY_Debug() {
 void MY_Sleep_DeInit() {
 
     // Deinitialize the peripherals
+#if USE_I2C
     MX_I2C1_DeInit();
+#endif
+#if USE_UART
     MX_USART1_UART_DeInit();
+#endif
 
     // Notify the Note subsystem that these will need to be reinitialized
     // on the next call to any of the Note I/O functions
@@ -413,22 +437,29 @@ void MY_Sleep_DeInit() {
 }
 
 // Serial port reset procedure, called before any I/O and called again upon I/O error
+#if NOTECARD_USE_UART
 void noteSerialReset() {
     MX_USART1_UART_DeInit();
     MX_USART1_UART_Init();
 }
+#endif
 
 // Serial write data function
+#if NOTECARD_USE_UART
 void noteSerialTransmit(uint8_t *text, size_t len, bool flush) {
     HAL_UART_Transmit(&huart1, text, len, 5000);
 }
+#endif
 
 // Serial "is anything available" function, which does a read-ahead for data into a serial buffer
+#if NOTECARD_USE_UART
 bool noteSerialAvailable() {
     return (serialFillIndex != serialDrainIndex);
 }
+#endif
 
 // Blocking serial read a byte function (generally only called if known to be available)
+#if NOTECARD_USE_UART
 char noteSerialReceive() {
     char data;
     while (!noteSerialAvailable()) ;
@@ -440,16 +471,20 @@ char noteSerialReceive() {
     }
     return data;
 }
+#endif
 
 // I2C reset procedure, called before any I/O and called again upon I/O error
+#if NOTECARD_USE_I2C
 void noteI2CReset() {
     MX_I2C1_DeInit();
     MX_I2C1_Init();
 }
+#endif
 
 // Transmits in master mode an amount of data, in blocking mode.     The address
 // is the actual address; the caller should have shifted it right so that the
 // low bit is NOT the read/write bit. An error message is returned, else NULL if success.
+#if NOTECARD_USE_I2C
 const char *noteI2CTransmit(uint16_t DevAddress, uint8_t* pBuffer, uint16_t Size) {
     char *errstr = NULL;
     int writelen = sizeof(uint8_t) + Size;
@@ -467,8 +502,10 @@ const char *noteI2CTransmit(uint16_t DevAddress, uint8_t* pBuffer, uint16_t Size
     }
     return errstr;
 }
+#endif
 
 // Receives in master mode an amount of data in blocking mode. An error mesage returned, else NULL if success.
+#if NOTECARD_USE_I2C
 const char *noteI2CReceive(uint16_t DevAddress, uint8_t* pBuffer, uint16_t Size, uint32_t *available) {
     const char *errstr = NULL;
     HAL_StatusTypeDef err_code;
@@ -515,3 +552,4 @@ const char *noteI2CReceive(uint16_t DevAddress, uint8_t* pBuffer, uint16_t Size,
     return errstr;
 
 }
+#endif

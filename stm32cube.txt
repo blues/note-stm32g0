@@ -12,7 +12,7 @@ In order to rebuild from STM32CubeMX:
   -- Parameter Settings / Baud Rate / 9600
   -- Parameter Settings / Word Length / 8 Bits
   -- Parameter Settings / Parity / None
-  -- NVIC Settings / USART2 Global Interrupt / Enabled
+  -- NVIC Settings / USART1 Global Interrupt / Enabled
   - Enable Connectivity / I2C1 / I2C
   -- NVIC Settings / I2C1 Event Interrupt / Enabled
   - Enable Timers / LPTIM1 / Mode / Count Internal Events

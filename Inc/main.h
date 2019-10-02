@@ -1,6 +1,17 @@
+// Copyright 2018 Blues Inc.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
 
 #ifndef __MAIN_H
 #define __MAIN_H
+
+// Choose whether to use I2C or SERIAL for the Notecard
+#define NOTECARD_USE_I2C 	false
+#define NOTECARD_USE_UART   !NOTECARD_USE_I2C
+
+// Include, or remove, support for these peripherals as needed for memory savings
+#define USE_I2C             NOTECARD_USE_I2C
+#define USE_UART            NOTECARD_USE_UART
 
 #ifdef __cplusplus
 extern "C" {

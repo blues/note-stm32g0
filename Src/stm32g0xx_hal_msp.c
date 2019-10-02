@@ -12,6 +12,7 @@ void HAL_MspInit(void) {
 }
 
 // Initialize all I2C ports
+#if USE_I2C
 void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c) {
 
     // Handle I2C1
@@ -39,8 +40,10 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c) {
     }
 
 }
+#endif
 
 // Deinitialize all I2C ports
+#if USE_I2C
 void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c) {
 
     // Handle I2C1
@@ -60,8 +63,10 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c) {
     }
 
 }
+#endif
 
 // Initialize all UART ports
+#if USE_UART
 void HAL_UART_MspInit(UART_HandleTypeDef* huart) {
 
     // Handle USART1
@@ -89,8 +94,10 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart) {
     }
 
 }
+#endif
 
 // Deinitialize all UARTs
+#if USE_UART
 void HAL_UART_MspDeInit(UART_HandleTypeDef* huart) {
 
     // Handle USART1
@@ -110,6 +117,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart) {
     }
 
 }
+#endif
 
 // Initialize all low power timers
 #ifdef EVENT_TIMER

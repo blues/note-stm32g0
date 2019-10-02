@@ -7,9 +7,13 @@
 #include "stm32g0xx_it.h"
 
 // I/O peripheral handles
+#if USE_I2C
 extern I2C_HandleTypeDef hi2c1;
+#endif
+#if USE_UART
 extern UART_HandleTypeDef huart1;
 extern void MY_UART_IRQHandler(UART_HandleTypeDef *huart);
+#endif
 #ifdef EVENT_TIMER
 extern LPTIM_HandleTypeDef hlptim1;
 #endif
@@ -56,6 +60,7 @@ void SysTick_Handler(void) {
 }
 
 // I2C1 event interrupt
+#if USE_I2C
 void I2C1_IRQHandler(void) {
   if (hi2c1.Instance->ISR & (I2C_FLAG_BERR | I2C_FLAG_ARLO | I2C_FLAG_OVR)) {
     HAL_I2C_ER_IRQHandler(&hi2c1);
@@ -63,12 +68,15 @@ void I2C1_IRQHandler(void) {
     HAL_I2C_EV_IRQHandler(&hi2c1);
   }
 }
+#endif
 
 // USART1 global interrupt
+#if USE_UART
 void USART1_IRQHandler(void) {
   HAL_UART_IRQHandler(&huart1);
     MY_UART_IRQHandler(&huart1);
 }
+#endif
 
 // GPIO handler, enhanced from the base ST handler in a way that enables us to distinguish from the multiple
 // pins that sharing the same EXTI.
