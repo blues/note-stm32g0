@@ -88,7 +88,7 @@ void loop() {
 	// the response.  Note that because the Notecard library uses malloc(), developers must always
 	// check for NULL to ensure that there was enough memory available on the microcontroller to
 	// satisfy the allocation request.
-	double temperature = 0;
+	JNUMBER temperature = 0;
     J *rsp = NoteRequestResponse(NoteNewRequest("card.temp"));
     if (rsp != NULL) {
         temperature = JGetNumber(rsp, "value");
@@ -96,7 +96,7 @@ void loop() {
     }
 
 	// Do the same to retrieve the voltage that is detected by the Notecard on its V+ pin.
-	double voltage = 0;
+	JNUMBER voltage = 0;
     rsp = NoteRequestResponse(NoteNewRequest("card.voltage"));
     if (rsp != NULL) {
         voltage = JGetNumber(rsp, "value");
