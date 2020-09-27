@@ -25,7 +25,7 @@ void eventClear(uint32_t event);
 
 // Note that if we use a button, this defines the GPIO where pulling it to ground represents "push"
 #ifdef EVENT_BUTTON
-#define GPIO_BUTTON_CLOCK_ENABLE    __HAL_RCC_GPIOC_CLK_ENABLE
+#define GPIO_BUTTON_CLOCK_ENABLE    __HAL_RCC_GPIOB_CLK_ENABLE
 #define GPIO_BUTTON_PORT            GPIOB
 #define GPIO_BUTTON_PIN             GPIO_PIN_4
 #define GPIO_BUTTON_IRQ             EXTI4_15_IRQn
