@@ -45,7 +45,7 @@ void setup() {
 	// "NoteNewRequest()" uses the bundled "J" json package to allocate a "req", which is a JSON object
 	// for the request to which we will then add Request arguments.  The function allocates a "req"
 	// request structure using malloc() and initializes its "req" field with the type of request.
-	J *req = NoteNewRequest("service.set");
+	J *req = NoteNewRequest("hub.set");
 
 	// This command (required) causes the data to be delivered to the Project on notehub.io that has claimed
 	// this Product ID.  (see above)
@@ -59,12 +59,12 @@ void setup() {
 	JAddStringToObject(req, "mode", "continuous");
 #else
 	JAddStringToObject(req, "mode", "periodic");
-	JAddNumberToObject(req, "minutes", 60);
+	JAddNumberToObject(req, "outbound", 60);
 #endif
 
 	// Issue the request, telling the Notecard how and how often to access the service.
 	// This results in a JSON message to Notecard formatted like:
-	//	   { "req"	   : "service.set",
+	//	   { "req"	   : "hub.set",
 	//		 "product" : myProductID,
 	//		 "mode"	   : "continuous"
 	//	   }

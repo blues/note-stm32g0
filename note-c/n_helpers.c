@@ -606,7 +606,7 @@ bool NoteFactoryReset(bool deleteConfigSettings) {
 // Set the card product ID
 bool NoteSetProductID(const char *productID) {
     bool success = false;
-    J *req = NoteNewRequest("service.set");
+    J *req = NoteNewRequest("hub.set");
     if (req != NULL) {
         if (productID[0] == '\0')
             JAddStringToObject(req, "product", "-");
@@ -622,7 +622,7 @@ bool NoteSetProductID(const char *productID) {
 // Set the card serial number
 bool NoteSetSerialNumber(const char *sn) {
     bool success = false;
-    J *req = NoteNewRequest("service.set");
+    J *req = NoteNewRequest("hub.set");
     if (req != NULL) {
         if (sn[0] == '\0')
             JAddStringToObject(req, "sn", "-");
@@ -638,11 +638,11 @@ bool NoteSetSerialNumber(const char *sn) {
 // Set the upload mode and interval
 bool NoteSetUploadMode(const char *uploadMode, int uploadMinutes, bool align) {
     bool success = false;
-    J *req = NoteNewRequest("service.set");
+    J *req = NoteNewRequest("hub.set");
     if (req != NULL) {
         JAddStringToObject(req, "mode", uploadMode);
         if (uploadMinutes != 0) {
-            JAddNumberToObject(req, "minutes", uploadMinutes);
+            JAddNumberToObject(req, "outbound", uploadMinutes);
             // Setting this flag aligns uploads to be grouped within the period,
             // rather than counting the number of minutes from "first modified".
             JAddBoolToObject(req, "align", align);
