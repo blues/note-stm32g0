@@ -1,36 +1,44 @@
-// Portions Copyright 2019 Inca Roads LLC.  All rights reserved.
-// Use of this source code is governed by licenses granted by the
-// copyright holder including that found in the LICENSE file.
-//
-// MODIFIED for use in notecard primarily by altering default memory allocator
-// and by renaming the functions so that they won't conflict with a developer's
-// own decision to incorporate the actual production cJSON into their own app.
-// In no way shall this interfere with a production cJSON.
-
-/*
-  Portions Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
-*/
-
-/* cJSON */
-/* JSON parser in C. */
+/*!
+ * @file n_cjson.c
+ *
+ * Written by Ray Ozzie and Blues Inc. team.
+ *
+ * Portions Copyright (c) 2019 Blues Inc. MIT License. Use of this source code is
+ * governed by licenses granted by the copyright holder including that found in
+ * the
+ * <a href="https://github.com/blues/note-c/blob/master/LICENSE">LICENSE</a>
+ * file.
+ *
+ * MODIFIED for use in notecard primarily by altering default memory allocator
+ * and by renaming the functions so that they won't conflict with a developer's
+ * own decision to incorporate the actual production cJSON into their own app.
+ * In no way shall this interfere with a production cJSON.
+ *
+ * Renaming was done as follows:
+ * CJSON_ -> N_CJSON_
+ * cJSON_ -> J
+ * cJSON -> J
+ *
+ * Portions Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software i
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 /* disable warnings about old C89 functions in MSVC */
 #if !defined(_CRT_SECURE_NO_DEPRECATE) && defined(_MSC_VER)
@@ -685,7 +693,7 @@ static Jbool parse_string(J * const item, parse_buffer * const input_buffer)
 
         /* This is at most how much we need for the output */
         allocation_length = (size_t) (input_end - buffer_at_offset(input_buffer)) - skipped_bytes;
-        output = (unsigned char*)_Malloc(allocation_length + sizeof(""));
+        output = (unsigned char*)_Malloc(allocation_length + 1);	// trailing '\0'
         if (output == NULL)
         {
             goto fail; /* allocation failure */
@@ -808,12 +816,14 @@ static Jbool print_string_ptr(const unsigned char * const input, printbuffer * c
     /* empty string */
     if (input == NULL)
     {
-        output = ensure(output_buffer, sizeof("\"\""));
+        output = ensure(output_buffer, 2);	// sizeof("\"\"")
         if (output == NULL)
         {
             return false;
         }
-        strcpy((char*)output, "\"\"");
+		output[0] = '"';
+		output[1] = '"';
+		output[2] = '\0';
 
         return true;
     }
@@ -844,7 +854,7 @@ static Jbool print_string_ptr(const unsigned char * const input, printbuffer * c
     }
     output_length = (size_t)(input_pointer - input) + escape_characters;
 
-    output = ensure(output_buffer, output_length + sizeof("\"\""));
+    output = ensure(output_buffer, output_length + 2);	// sizeof("\"\"")
     if (output == NULL)
     {
         return false;
@@ -980,7 +990,7 @@ N_CJSON_PUBLIC(J *) JParseWithOpts(const char *value, const char **return_parse_
     }
 
     buffer.content = (const unsigned char*)value;
-    buffer.length = strlen((const char*)value) + sizeof("");
+    buffer.length = strlen((const char*)value) + 1;		// Trailing '\0'
     buffer.offset = 0;
 
     item = JNew_Item();
@@ -1053,7 +1063,7 @@ N_CJSON_PUBLIC(J *) JParse(const char *value)
 
 static unsigned char *print(const J * const item, Jbool format)
 {
-    static const size_t default_buffer_size = 256;
+    static const size_t default_buffer_size = 128;
     printbuffer buffer[1];
     unsigned char *printed = NULL;
 
@@ -1171,21 +1181,21 @@ static Jbool parse_value(J * const item, parse_buffer * const input_buffer)
 
     /* parse the different types of values */
     /* null */
-    if (can_read(input_buffer, 4) && (strncmp((const char*)buffer_at_offset(input_buffer), "null", 4) == 0))
+    if (can_read(input_buffer, 4) && (strncmp((const char*)buffer_at_offset(input_buffer), c_null, c_null_len) == 0))
     {
         item->type = JNULL;
         input_buffer->offset += 4;
         return true;
     }
     /* false */
-    if (can_read(input_buffer, 5) && (strncmp((const char*)buffer_at_offset(input_buffer), "false", 5) == 0))
+    if (can_read(input_buffer, 5) && (strncmp((const char*)buffer_at_offset(input_buffer), c_false, c_false_len) == 0))
     {
         item->type = JFalse;
         input_buffer->offset += 5;
         return true;
     }
     /* true */
-    if (can_read(input_buffer, 4) && (strncmp((const char*)buffer_at_offset(input_buffer), "true", 4) == 0))
+    if (can_read(input_buffer, 4) && (strncmp((const char*)buffer_at_offset(input_buffer), c_true, c_true_len) == 0))
     {
         item->type = JTrue;
         item->valueint = 1;
@@ -1229,30 +1239,30 @@ static Jbool print_value(const J * const item, printbuffer * const output_buffer
     switch ((item->type) & 0xFF)
     {
         case JNULL:
-            output = ensure(output_buffer, 5);
+            output = ensure(output_buffer, c_null_len+1);
             if (output == NULL)
             {
                 return false;
             }
-            strcpy((char*)output, "null");
+            strcpy((char*)output, c_null);
             return true;
 
         case JFalse:
-            output = ensure(output_buffer, 6);
+            output = ensure(output_buffer, c_false_len+1);
             if (output == NULL)
             {
                 return false;
             }
-            strcpy((char*)output, "false");
+            strcpy((char*)output, c_false);
             return true;
 
         case JTrue:
-            output = ensure(output_buffer, 5);
+            output = ensure(output_buffer, c_true_len+1);
             if (output == NULL)
             {
                 return false;
             }
-            strcpy((char*)output, "true");
+            strcpy((char*)output, c_true);
             return true;
 
         case JNumber:
@@ -1266,7 +1276,7 @@ static Jbool print_value(const J * const item, printbuffer * const output_buffer
                 return false;
             }
 
-            raw_length = strlen(item->valuestring) + sizeof("");
+            raw_length = strlen(item->valuestring) + 1;		// Trailing '\0';
             output = ensure(output_buffer, raw_length);
             if (output == NULL)
             {
@@ -2175,7 +2185,7 @@ static Jbool replace_item_in_object(J *object, const char *string, J *replacemen
     /* replace the name in the replacement */
     if (!(replacement->type & JStringIsConst) && (replacement->string != NULL))
     {
-        Jfree(replacement->string);
+        _Free(replacement->string);
     }
     replacement->string = (char*)Jstrdup((const unsigned char*)string);
     replacement->type &= ~JStringIsConst;

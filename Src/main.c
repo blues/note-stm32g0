@@ -54,7 +54,7 @@ void noteSerialReset(void);
 void noteSerialTransmit(uint8_t *text, size_t len, bool flush);
 bool noteSerialAvailable(void);
 char noteSerialReceive(void);
-void noteI2CReset(void);
+void noteI2CReset(uint16_t DevAddress);
 const char *noteI2CTransmit(uint16_t DevAddress, uint8_t* pBuffer, uint16_t Size);
 const char *noteI2CReceive(uint16_t DevAddress, uint8_t* pBuffer, uint16_t Size, uint32_t *avail);
 
@@ -475,7 +475,7 @@ char noteSerialReceive() {
 
 // I2C reset procedure, called before any I/O and called again upon I/O error
 #if NOTECARD_USE_I2C
-void noteI2CReset() {
+void noteI2CReset(uint16_t DevAddress) {
     MX_I2C1_DeInit();
     MX_I2C1_Init();
 }

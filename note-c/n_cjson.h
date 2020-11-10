@@ -1,38 +1,44 @@
-// Portions Copyright 2019 Inca Roads LLC.  All rights reserved.
-// Use of this source code is governed by licenses granted by the
-// copyright holder including that found in the LICENSE file.
-//
-// MODIFIED for use in notecard primarily by altering default memory allocator
-// and by renaming the functions so that they won't conflict with a developer's
-// own decision to incorporate the actual production cJSON into their own app.
-// In no way shall this interfere with a production cJSON.
-//
-// Renaming was done as follows:
-//   CJSON_ -> N_CJSON_
-//   cJSON_ -> J
-//   cJSON -> J
-
-/*
-  Portions Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
-*/
+/*!
+ * @file n_cjson.h
+ *
+ * Written by Ray Ozzie and Blues Inc. team.
+ *
+ * Portions Copyright (c) 2019 Blues Inc. MIT License. Use of this source code is
+ * governed by licenses granted by the copyright holder including that found in
+ * the
+ * <a href="https://github.com/blues/note-c/blob/master/LICENSE">LICENSE</a>
+ * file.
+ *
+ * MODIFIED for use in notecard primarily by altering default memory allocator
+ * and by renaming the functions so that they won't conflict with a developer's
+ * own decision to incorporate the actual production cJSON into their own app.
+ * In no way shall this interfere with a production cJSON.
+ *
+ * Renaming was done as follows:
+ * CJSON_ -> N_CJSON_
+ * cJSON_ -> J
+ * cJSON -> J
+ *
+ * Portions Copyright (c) 2009-2017 Dave Gamble and cJSON contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software i
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 #ifndef J_h
 #define J_h
@@ -81,7 +87,6 @@ typedef struct J
     int valueint;
     /* The item's number, if type==JNumber */
     JNUMBER valuenumber;
-
     /* The item's name string, if this item is the child of, or is in the list of subitems of an object. */
     char *string;
 } J;
@@ -149,7 +154,7 @@ N_CJSON_PUBLIC(const char*) JVersion(void);
 /* Supply malloc, realloc and free functions to J */
 N_CJSON_PUBLIC(void) JInitHooks(JHooks* hooks);
 
-/* Memory Management: the caller is always responsible to free the results from all variants of JParse (with JDelete) and JPrint (with stdlib free, JHooks.free_fn, or Jfree as appropriate). The exception is JPrintPreallocated, where the caller has full responsibility of the buffer. */
+/* Memory Management: the caller is always responsible to free the results from all variants of JParse (with JDelete) and JPrint (with stdlib free, JHooks.free_fn, or JFree as appropriate). The exception is JPrintPreallocated, where the caller has full responsibility of the buffer. */
 /* Supply a block of JSON, and this returns a J object you can interrogate. */
 N_CJSON_PUBLIC(J *) JParse(const char *value);
 /* ParseWithOpts allows you to require (and check) that the JSON is null terminated, and to retrieve the pointer to the final byte parsed. */
@@ -269,6 +274,8 @@ N_CJSON_PUBLIC(J*) JAddStringToObject(J * const object, const char * const name,
 N_CJSON_PUBLIC(J*) JAddRawToObject(J * const object, const char * const name, const char * const raw);
 N_CJSON_PUBLIC(J*) JAddObjectToObject(J * const object, const char * const name);
 N_CJSON_PUBLIC(J*) JAddArrayToObject(J * const object, const char * const name);
+#define JConvertToJSONString JPrintUnformatted
+#define JConvertFromJSONString JParse
 
 /* When assigning an integer value, it needs to be propagated to valuenumber too. */
 #define JSetIntValue(object, number) ((object) ? (object)->valueint = (object)->valuenumber = (number) : (number))
@@ -278,10 +285,12 @@ N_CJSON_PUBLIC(JNUMBER) JSetNumberHelper(J *object, JNUMBER number);
 
 /* Macro for iterating over an array or object */
 #define JArrayForEach(element, array) for(element = (array != NULL) ? (array)->child : NULL; element != NULL; element = element->next)
+// Iterate over the fields of an object
+#define JObjectForEach(element, array) JArrayForEach(element, array)
 
 /* malloc/free objects using the malloc/free functions that have been set with JInitHooks */
-N_CJSON_PUBLIC(void *) Jmalloc(size_t size);
-N_CJSON_PUBLIC(void) Jfree(void *object);
+N_CJSON_PUBLIC(void *) JMalloc(size_t size);
+N_CJSON_PUBLIC(void) JFree(void *object);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,7 @@
-/**
+/*!
+ * @file n_ftoa.c
+ *
+ *
  *	stm32tpl --	 STM32 C++ Template Peripheral Library
  *
  *	Copyright (c) 2009-2014 Anton B. Gusev aka AHTOXA
@@ -21,28 +24,11 @@
  *	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *	THE SOFTWARE.
  *
- *
- *	file		 : ftoa.c
- *	description	 : convert double to string
+ * 	description	 : convert double to string
  *
  */
 
 #include "n_lib.h"
-
-static const JNUMBER rounders[JNTOA_PRECISION + 1] =
-{
-	0.5,				// 0
-	0.05,				// 1
-	0.005,				// 2
-	0.0005,				// 3
-	0.00005,			// 4
-	0.000005,			// 5
-	0.0000005,			// 6
-	0.00000005,			// 7
-	0.000000005,		// 8
-	0.0000000005,		// 9
-	0.00000000005		// 10
-};
 
 char * JNtoA(JNUMBER f, char * buf, int original_precision)
 {
@@ -51,6 +37,22 @@ char * JNtoA(JNUMBER f, char * buf, int original_precision)
 	char * p1;
 	char c;
 	long intPart;
+
+	// For our low-SRAM devices we'd rather have this on the stack
+	const JNUMBER rounders[JNTOA_PRECISION + 1] =
+		{
+			0.5,				// 0
+			0.05,				// 1
+			0.005,				// 2
+			0.0005,				// 3
+			0.00005,			// 4
+			0.000005,			// 5
+			0.0000005,			// 6
+			0.00000005,			// 7
+			0.000000005,		// 8
+			0.0000000005,		// 9
+			0.00000000005		// 10
+		};
 
 	// Check specifically for uncommon but bad floating point numbers that can't be converted
 	uint8_t fbytes[8];
@@ -90,7 +92,7 @@ char * JNtoA(JNUMBER f, char * buf, int original_precision)
 		f += rounders[precision];
 
 	// integer part...
-	intPart = f;
+	intPart = (int) f;
 	f -= intPart;
 
 	if (!intPart)
@@ -133,7 +135,7 @@ char * JNtoA(JNUMBER f, char * buf, int original_precision)
 		while (precision--)
 		{
 			f *= 10.0;
-			c = f;
+			c = (int) f;
 
 			// Invalid floating point numbers (specifically 0xffffff) end up at this point
 			// with a c == 255 after the coercion
