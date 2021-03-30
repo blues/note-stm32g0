@@ -49,9 +49,9 @@ clean up inconsistent whitespace )
 5. [Submit a pull request.][pr]
 
 ## Notes
-* Please add tests if you changed code. Contributions without tests won't be
-* accepted. If you don't know how to add tests, please put in a PR and leave a
-* comment asking for help. We love helping!
+* Add tests if you changed code. Contributions without tests won't be accepted. 
+* If you don't know how to add tests, please put in a PR and leave a comment asking for help. 
+We love helping!
 
 [repo]: https://github.com/blues/note-stm32g0/tree/master
 [fork]: https://help.github.com/articles/fork-a-repo/
