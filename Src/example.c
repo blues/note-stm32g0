@@ -22,7 +22,11 @@
 // "claim" a unique product ID for your device.  It could be something as simple as as your email
 // address in reverse, such as "com.gmail.smith.lisa.test-device" or "com.outlook.gates.bill.demo"
 
-#define myProductID "org.coca-cola.soda.vending-machine.v2"
+#ifndef PRODUCT_UID
+#define PRODUCT_UID ""
+#endif
+
+#define myProductID PRODUCT_UID
 #define myLiveDemo  true
 
 // The amount of time between loops that take samples and send them to the service
