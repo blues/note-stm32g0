@@ -22,7 +22,11 @@
 // "claim" a unique product ID for your device.  It could be something as simple as as your email
 // address in reverse, such as "com.gmail.smith.lisa.test-device" or "com.outlook.gates.bill.demo"
 
-#define myProductID "org.coca-cola.soda.vending-machine.v2"
+#ifndef PRODUCT_UID
+#define PRODUCT_UID ""
+#endif
+
+#define myProductID PRODUCT_UID
 #define myLiveDemo  true
 
 // The amount of time between loops that take samples and send them to the service
@@ -49,8 +53,9 @@ void setup() {
 
 	// This command (required) causes the data to be delivered to the Project on notehub.io that has claimed
 	// this Product ID.  (see above)
-	JAddStringToObject(req, "product", myProductID);
-
+	if (myProductID[0]) {
+		JAddStringToObject(req, "product", myProductID);
+	}
 	// This command determines how often the Notecard connects to the service.  If "continuous" the Notecard
     // immediately establishes a session with the service at notehub.io, and keeps it active continuously.
     // Because of the power requirements of a continuous connection, a battery powered device would instead
